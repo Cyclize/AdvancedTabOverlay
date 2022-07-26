@@ -48,7 +48,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.val;
-import org.bstats.bukkit.Metrics;
+import me.clip.placeholderapi.events.ExpansionsLoadedEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -67,7 +67,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
@@ -80,6 +79,7 @@ public class AdvancedTabOverlay extends JavaPlugin implements Listener {
     private ConfigTabOverlayManager configTabOverlayManager;
     private SpectatorPassthroughTabOverlayManager spectatorPassthroughTabOverlayManager;
     private List<EventListener> listeners = new ArrayList<>();
+    private boolean serverFullyLoaded = false;
     @Getter
     private EventExecutor tabEventQueue;
     @Getter
@@ -95,14 +95,12 @@ public class AdvancedTabOverlay extends JavaPlugin implements Listener {
 
     @Override
     public void onLoad() {
-        // todo init API
         dataManager = new DataManager(this);
     }
 
     @Override
-    @SneakyThrows // todo catch exceptions
+    @SneakyThrows
     public void onEnable() {
-        Metrics metrics = new Metrics(this);
         getCommand("ato").setExecutor(new ATOCommand());
         getCommand("ato").setTabCompleter(Completer.create().any("reload", "info"));
         asyncExecutor = new DefaultEventExecutorGroup(4);
@@ -174,7 +172,6 @@ public class AdvancedTabOverlay extends JavaPlugin implements Listener {
                 iconManager);
         spectatorPassthroughTabOverlayManager = new SpectatorPassthroughTabOverlayManager(platform, tabEventQueue, ATODataKeys.GAMEMODE);
 
-        getServer().getScheduler().runTaskLater(this, this::onServerFullyLoaded, 20);
         getServer().getPluginManager().registerEvents(this, this);
         dataManager.enable();
 
@@ -212,7 +209,6 @@ public class AdvancedTabOverlay extends JavaPlugin implements Listener {
 
     @SneakyThrows
     private void onServerFullyLoaded() {
-
         ProtocolManager pm = ProtocolLibrary.getProtocolManager();
         List<PacketListener> incompatibleListeners = new ArrayList<>();
         for (PacketListener listener : pm.getPacketListeners()) {
@@ -268,6 +264,13 @@ public class AdvancedTabOverlay extends JavaPlugin implements Listener {
         tabEventQueue.shutdownGracefully();
 
         tabOverlayHandlerFactory.onDisable();
+    }
+
+    @EventHandler
+    public void onPlaceholdersLoad(ExpansionsLoadedEvent event) {
+        if (serverFullyLoaded) return;
+        serverFullyLoaded = true;
+        this.onServerFullyLoaded();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -339,7 +342,7 @@ public class AdvancedTabOverlay extends JavaPlugin implements Listener {
 
         // clear icon cache
         iconManager.clearCache();
-        
+
         // load tab lists
         Path tabLists = getDataFolder().toPath().resolve("tabLists");
         configTabOverlayManager.reloadConfigs(ImmutableSet.of(tabLists));

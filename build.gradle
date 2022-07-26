@@ -39,8 +39,6 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'maven-publish-auth'
 
-sourceCompatibility = 1.8
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -54,22 +52,25 @@ repositories {
         url "https://repo.dmulloy2.net/nexus/repository/public/"
     }
     maven {
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+    maven {
         name "CodeMC"
         url "https://repo.codemc.org/repository/maven-public"
     }
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.20'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
-    testCompileOnly 'org.projectlombok:lombok:1.18.20'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 
-    compileOnly "com.google.code.findbugs:jsr305:3.0.1"
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     compileOnly "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
-    compileOnly "io.netty:netty-all:4.1.9.Final"
+    compileOnly 'io.netty:netty-all:4.1.77.Final'
     compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.7.0-SNAPSHOT"
-    compileOnly "me.clip.placeholderapi:PlaceholderAPI:1.8.5"
+    compileOnly "me.clip:placeholderapi:2.11.2"
     implementation "de.codecrafter47.taboverlay:taboverlaycommon-api:1.0-SNAPSHOT"
     implementation "de.codecrafter47.taboverlay:taboverlaycommon-config:1.0-SNAPSHOT"
     implementation "de.codecrafter47.data:api:1.0.2-SNAPSHOT"
@@ -77,7 +78,7 @@ dependencies {
     implementation "de.codecrafter47.data.bukkit:api:1.0.2-SNAPSHOT"
     implementation "de.codecrafter47.data:bukkit:1.0.2-SNAPSHOT"
     implementation "codecrafter47.util:chat-utils:1.1-SNAPSHOT"
-    implementation "org.bstats:bstats-bukkit:1.4"
+    implementation 'org.bstats:bstats-bukkit:3.0.0'
 }
 
 task sourceJar(type: Jar) {
